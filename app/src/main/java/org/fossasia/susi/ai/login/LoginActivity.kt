@@ -11,6 +11,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import com.google.android.gms.auth.api.credentials.Credential
 import kotlinx.android.synthetic.main.activity_login.*
 import org.fossasia.susi.ai.R
 import org.fossasia.susi.ai.chat.ChatActivity
@@ -21,6 +22,8 @@ import org.fossasia.susi.ai.helper.Utils.hideSoftKeyboard
 import org.fossasia.susi.ai.login.contract.ILoginPresenter
 import org.fossasia.susi.ai.login.contract.ILoginView
 import org.fossasia.susi.ai.signup.SignUpActivity
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 /**
  * <h1>The Login activity.</h1>
@@ -33,7 +36,7 @@ class LoginActivity : AppCompatActivity(), ILoginView {
 
     lateinit var forgotPasswordProgressDialog: AlertDialog
     lateinit var builder: AlertDialog.Builder
-    private lateinit var loginPresenter: ILoginPresenter
+    private val loginPresenter: ILoginPresenter by inject { parametersOf(this) }
     private lateinit var progressDialog: ProgressDialog
 
     @SuppressLint("InflateParams")
@@ -66,17 +69,32 @@ class LoginActivity : AppCompatActivity(), ILoginView {
         cancelRequestPassword()
         requestPassword()
 
-        loginPresenter = LoginPresenter(this)
         loginPresenter.onAttach(this)
+
         val bundle = intent.extras
         val string = bundle?.getString("email")
         if (string != null)
             email.editText?.setText(string)
+
+        loginPresenter.clientRequest(this)
+    }
+
+    override fun onCredentialRetrieved(credential: Credential?) {
+
+        var accountName = credential?.name
+        if (accountName == Constant.SUSI_ACCOUNT) {
+            email.editText?.setText(credential?.id.toString())
+            password.editText?.setText(credential?.password.toString())
+        }
     }
 
     override fun onLoginSuccess(message: String?) {
         hideSoftKeyboard(this, window.decorView)
         Toast.makeText(this@LoginActivity, message, Toast.LENGTH_SHORT).show()
+        if (rememberCredential.isChecked) {
+            loginPresenter.saveCredential(email.editText?.text.toString(), password.editText?.text.toString())
+        }
+
         val intent = Intent(this@LoginActivity, ChatActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra(Constant.FIRST_TIME, true)
@@ -192,11 +210,6 @@ class LoginActivity : AppCompatActivity(), ILoginView {
         outState.putBoolean(Constant.SERVER, customServer.isChecked)
     }
 
-    override fun onDestroy() {
-        loginPresenter.onDetach()
-        super.onDestroy()
-    }
-
     override fun resetPasswordSuccess() {
         startActivity(Intent(this@LoginActivity, ForgotPass::class.java))
     }
@@ -227,5 +240,10 @@ class LoginActivity : AppCompatActivity(), ILoginView {
             forgotPassword.isEnabled = false
             loginPresenter.requestPassword(email, url, isPersonalServerChecked)
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        loginPresenter.skipLogin()
     }
 }

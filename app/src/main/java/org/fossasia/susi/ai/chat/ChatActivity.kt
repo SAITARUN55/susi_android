@@ -5,6 +5,7 @@ import ai.kitt.snowboy.audio.AudioDataSaver
 import ai.kitt.snowboy.audio.RecordingThread
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.ProgressDialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -17,26 +18,30 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.view.GestureDetectorCompat
+import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
-import android.view.KeyEvent
-import android.view.View
-import android.view.MotionEvent
-import android.view.WindowManager
 import android.view.GestureDetector
+import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
+import android.view.animation.OvershootInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import io.realm.RealmResults
+import java.util.Locale
 import kotlinx.android.synthetic.main.activity_chat.*
 import org.fossasia.susi.ai.R
 import org.fossasia.susi.ai.chat.adapters.recycleradapters.ChatFeedRecyclerAdapter
@@ -48,8 +53,9 @@ import org.fossasia.susi.ai.helper.Constant
 import org.fossasia.susi.ai.helper.PrefManager
 import org.fossasia.susi.ai.helper.Utils.hideSoftKeyboard
 import org.fossasia.susi.ai.skills.SkillsActivity
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 import timber.log.Timber
-import java.util.Locale
 
 /**
  * The Chat Activity. Does all the main processes including
@@ -61,7 +67,7 @@ import java.util.Locale
 @Suppress("UNUSED_PARAMETER", "DEPRECATION")
 class ChatActivity : AppCompatActivity(), IChatView {
 
-    lateinit var chatPresenter: IChatPresenter
+    private val chatPresenter: IChatPresenter by inject { parametersOf(this) }
     lateinit var youtubeVid: IYoutubeVid
     private val PERM_REQ_CODE = 1
     private lateinit var recyclerAdapter: ChatFeedRecyclerAdapter
@@ -73,6 +79,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
     private var gestureDetectorCompat: GestureDetectorCompat? = null
     private var isConfigurationChanged = false
     private var isSearching: Boolean = false
+    private val voiceSearchCode = 10
     private val enterAsSend: Boolean by lazy {
         PrefManager.getBoolean(R.string.settings_enterPreference_key, false)
     }
@@ -91,17 +98,13 @@ class ChatActivity : AppCompatActivity(), IChatView {
         val firstRun = intent.getBooleanExtra(Constant.FIRST_TIME, false)
         gestureDetectorCompat = GestureDetectorCompat(this, CustomGestureListener())
 
-        chatPresenter = ChatPresenter(this)
-        chatPresenter.onAttach(this)
-
         youtubeVid = YoutubeVid(this)
         setUpUI()
         initializationMethod(firstRun)
 
-        example = if (intent.getStringExtra("example") != null) {
-            intent.getStringExtra("example")
-        } else {
-            ""
+        if (intent.hasExtra("example")) {
+            example = intent.getStringExtra("example")
+            intent.removeExtra("example")
         }
 
         networkStateReceiver = object : BroadcastReceiver() {
@@ -109,24 +112,29 @@ class ChatActivity : AppCompatActivity(), IChatView {
                 chatPresenter.startComputingThread()
             }
         }
+        searchChat.visibility = View.VISIBLE
+        fabsetting.visibility = View.VISIBLE
+        voiceSearchChat.visibility = View.VISIBLE
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
         this.gestureDetectorCompat?.onTouchEvent(event)
         return super.onTouchEvent(event)
     }
 
-    //Inner class for handling the gestures
+    // Inner class for handling the gestures
     internal inner class CustomGestureListener : GestureDetector.SimpleOnGestureListener() {
 
         override fun onFling(
-            event1: MotionEvent,
-            event2: MotionEvent,
+            event1: MotionEvent?,
+            event2: MotionEvent?,
             velocityX: Float,
             velocityY: Float
         ): Boolean {
+            if (event1 == null || event2 == null)
+                return false
             val X = event1.getX() - event2.getX()
-            //Swipe from right to left
+            // Swipe from right to left
             if (X >= 100 && X <= 1000) {
                 val intent = Intent(this@ChatActivity, SkillsActivity::class.java)
                 startActivity(intent)
@@ -156,12 +164,47 @@ class ChatActivity : AppCompatActivity(), IChatView {
     }
 
     fun openChatSearch(view: View) {
+        val interpolator = OvershootInterpolator()
         if (isSearching == false || chatSearchInput.getVisibility() == View.VISIBLE) {
-            chatSearchInput.setVisibility(View.INVISIBLE)
+            ViewCompat.animate(view)
+                    .rotation(0f)
+                    .withLayer()
+                    .setDuration(300)
+                    .setInterpolator(interpolator)
+                    .start()
+            chatSearchInput.setVisibility(View.GONE)
             hideSoftKeyboard(this, window.decorView)
         } else {
+            ViewCompat.animate(view)
+                    .rotation(90f)
+                    .withLayer()
+                    .setDuration(300)
+                    .setInterpolator(interpolator)
+                    .start()
             chatSearchInput.setVisibility(View.VISIBLE)
             handleSearch()
+        }
+    }
+
+    fun openVoiceSearch(view: View) {
+        chatPresenter.stopHotwordDetection()
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivityForResult(intent, voiceSearchCode) // Sends the detected query to search
+        } else {
+            Toast.makeText(this, R.string.error_voice_chat_search, Toast.LENGTH_SHORT)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            voiceSearchCode -> if (resultCode == Activity.RESULT_OK && data != null) {
+                val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                performSearch(result[0])
+            }
         }
     }
 
@@ -170,7 +213,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP && chatSearchInput?.text.toString().isNotEmpty()) {
                 performSearch(chatSearchInput?.text.toString())
             }
-            true
+            false
         }
         chatSearchInput?.requestFocus()
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -197,7 +240,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
     private fun setEditText() {
         val watch = object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                //do whatever you want to do before text change in input edit text
+                // do whatever you want to do before text change in input edit text
             }
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
@@ -223,7 +266,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
             }
 
             override fun afterTextChanged(editable: Editable) {
-                //do whatever you want to do after text change in input edit text
+                // do whatever you want to do after text change in input edit text
             }
         }
 
@@ -320,20 +363,26 @@ class ChatActivity : AppCompatActivity(), IChatView {
         }
     }
 
-    //Take user's speech as input and send the message
+    // Take user's speech as input and send the message
     override fun promptSpeechInput() {
         if (recordingThread != null) {
             chatPresenter.stopHotwordDetection()
         }
         hideSoftKeyboard(this, window.decorView)
+        searchChat.visibility = View.GONE
+        fabsetting.visibility = View.GONE
+        voiceSearchChat.visibility = View.GONE
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.speechToTextFrame, STTFragment())
         fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
     }
 
-    //Replies user with Speech
+    // Replies user with Speech
     override fun voiceReply(reply: String, language: String) {
+        searchChat.visibility = View.VISIBLE
+        fabsetting.visibility = View.VISIBLE
+        voiceSearchChat.visibility = View.VISIBLE
         val audioFocus = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val handler = Handler()
         handler.post {
@@ -364,6 +413,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
                 audioFocus.abandonAudioFocus(changeListener)
             }
         }
+        startActivity(getIntent())
     }
 
     fun enableVoiceInput() {
@@ -380,7 +430,6 @@ class ChatActivity : AppCompatActivity(), IChatView {
     }
 
     override fun databaseUpdated() {
-        rv_chat_feed.smoothScrollToPosition(recyclerAdapter.itemCount)
         recyclerAdapter.notifyDataSetChanged()
     }
 
@@ -389,7 +438,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
         snackbar.show()
     }
 
-    //Initiates hotword detection
+    // Initiates hotword detection
     override fun initHotword() {
         recordingThread = RecordingThread(object : Handler() {
             override fun handleMessage(msg: Message) {
@@ -441,7 +490,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
     override fun checkEnterKeyPref(isChecked: Boolean) {
         if (isChecked) {
             askSusiMessage.imeOptions = EditorInfo.IME_ACTION_SEND
-            askSusiMessage.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD //setting this programmatically works for all devices
+            askSusiMessage.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD // setting this programmatically works for all devices
         } else {
             askSusiMessage.imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION
         }
@@ -516,6 +565,7 @@ class ChatActivity : AppCompatActivity(), IChatView {
         chatPresenter.getUndeliveredMessages()
 
         if (!example.isEmpty()) {
+            Timber.d("Message is not empty.")
             chatPresenter.addToNonDeliveredList(example, example)
             example = ""
         }
@@ -584,5 +634,9 @@ class ChatActivity : AppCompatActivity(), IChatView {
     override fun playVideo(videoId: String) {
         Timber.d(videoId)
         youtubeVid.playYoutubeVid(videoId)
+    }
+
+    companion object {
+        val ALARM = "ALARM"
     }
 }

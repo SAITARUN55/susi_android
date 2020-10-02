@@ -158,7 +158,7 @@
     <string name="field_cannot_be_empty">இந்த புலம் காலியாக இருக்க முடியாது</string>
     <string name="log_in">உள் நுழை</string>
     <string name="new_password">புதிய கடவுச்சொல்</string>
-    <string name="pass_validation_text">குறைந்தபட்சம் ஆறு எழுத்துகளின் கலவையை உள்ளிடவும்</string>
+    <string name="pass_validation_text">கடவுச்சொல் குறைந்தபட்சம் ஒரு சிறப்பு எழுத்து, ஒரு எண் மற்றும் ஒரு பெரிய எழுத்து ஆகியவற்றைக் கொண்ட எட்டு எழுத்துக்குறி நீளமாக இருக்க வேண்டும்</string>
     <string name="password">கடவுச்சொல்</string>
     <string name="password_cannot_be_empty">கடவுச்சொல் காலியாக இருக்க முடியாது</string>
     <string name="sample_website_description">மாதிரி உரையிலிருந்து ஒரு வலைத்தளம் எடுக்கப்பட்டது</string>
@@ -318,6 +318,12 @@
     <string name="accept_terms_and_conditions">பதிவு செய்ய நீங்கள் விதிமுறைகள் மற்றும் நிபந்தனைகளை ஏற்க வேண்டும்</string>
     <string name="accept_terms_conditions">நான் நியதிகளும் நிபந்தனைகள் ஒத்துகொள்கிறேன்</string>
     <string name="settings_visit_website">வலைத்தளத்தைப் பார்வையிடவும்</string>
+    <string name="voice_welcome">வணக்கம்! நான் எப்படி உங்களுக்கு உதவ முடியும்?</string>
     <string name="error_skipping_signUp_process_text">இது உள்நுழைவு செயல்முறையை ரத்துசெய்து, அரட்டை பக்கத்திற்கு உங்களை திருப்பி விடுகிறது.</string>
     <string name="dialog_skip_sign_up">உள்நுழையவும்?</string>
+    <string name="settings_help">സഹായിക്കൂ</string>
+    <string name="settings_help_key">സഹായിക്കൂ</string>
+    <string name="settings_privacy">സ്വകാര്യത</string>
+    <string name="settings_privacy_key">സ്വകാര്യത</string>
+    <string name="rate_chat">பதிலளிப்பதற்கு நன்றி</string>
 </resources>

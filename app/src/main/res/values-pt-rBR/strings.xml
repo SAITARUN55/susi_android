@@ -26,6 +26,7 @@
     <string name="hotword_success">Hotword detectada</string>
     <string name="custom_server">servidor customizado</string>
     <string name="settings_visit_website">Visite o site</string>
+    <string name="voice_welcome">Oi! Como posso ajudá-lo?</string>
 
     <string name="signup">Obrigado pelo seu registro</string>
     <string name="signup_msg">Enviamos um email para o endereço fornecido. Por favor use o
@@ -81,7 +82,7 @@
     <string name="password">Senha</string>
     <string name="confirm_password">Confirmar Senha</string>
     <string name="sign_up">Regristar-se</string>
-    <string name="pass_validation_text">Insira uma combinação de no mínimo seis caracteres</string>
+    <string name="pass_validation_text">A senha deve ter pelo menos oito caracteres e conter pelo menos um caractere especial, um número e uma letra maiúscula.</string>
     <string name="log_in">Entrar</string>
     <string name="field_cannot_be_empty">Este campo não pode ser vazio</string>
     <string name="email_cannot_be_empty">Email não pode ser vazio</string>
@@ -335,4 +336,9 @@
     <string name="no_skill_name">Nome não disponível</string>
     <string name="new_password">Nova senha</string>
     <string name="privacy_business_details">Se você estiver usando nossos serviços em nome de uma empresa, essa empresa aceita esses termos. Ele isentará e indenizará a SUSI e suas afiliadas, executivos, agentes e funcionários de qualquer reclamação, ação ou ação decorrente ou relacionada ao uso dos Serviços ou violação destes termos, incluindo qualquer responsabilidade ou despesa decorrente de reclamações, perdas. , danos, ações, julgamentos, custos de litígios e honorários advocatícios.</string>
+    <string name="settings_help">Socorro</string>
+    <string name="settings_help_key">Socorro</string>
+    <string name="settings_privacy">privacidade</string>
+    <string name="settings_privacy_key">privacidade</string>
+    <string name="rate_chat">Obrigado por responder</string>
 </resources>

@@ -1,13 +1,13 @@
 package org.fossasia.susi.ai.signup
 
 import android.graphics.Color
+import java.net.UnknownHostException
 import org.fossasia.susi.ai.R
 import org.fossasia.susi.ai.data.ForgotPasswordModel
 import org.fossasia.susi.ai.data.SignUpModel
 import org.fossasia.susi.ai.data.UtilModel
 import org.fossasia.susi.ai.data.contract.IForgotPasswordModel
 import org.fossasia.susi.ai.data.contract.ISignUpModel
-import org.fossasia.susi.ai.data.db.DatabaseRepository
 import org.fossasia.susi.ai.data.db.contract.IDatabaseRepository
 import org.fossasia.susi.ai.helper.Constant
 import org.fossasia.susi.ai.helper.CredentialHelper
@@ -18,7 +18,6 @@ import org.fossasia.susi.ai.signup.contract.ISignUpPresenter
 import org.fossasia.susi.ai.signup.contract.ISignUpView
 import org.fossasia.susi.ai.skills.settings.contract.ISettingsView
 import retrofit2.Response
-import java.net.UnknownHostException
 
 /**
  * Presenter for Login
@@ -27,19 +26,10 @@ import java.net.UnknownHostException
  * Created by mayanktripathi on 05/07/17.
  */
 
-class SignUpPresenter(signUpActivity: SignUpActivity) : ISignUpPresenter, ISignUpModel.OnSignUpFinishedListener, IForgotPasswordModel.OnFinishListener {
+class SignUpPresenter(private val forgotPasswordModel: ForgotPasswordModel, private val signUpModel: SignUpModel, private val utilModel: UtilModel, private val databaseRepository: IDatabaseRepository, private val signUpView: ISignUpView) : ISignUpPresenter, ISignUpModel.OnSignUpFinishedListener, IForgotPasswordModel.OnFinishListener {
 
-    private var signUpView: ISignUpView? = null
-    private var signUpModel: SignUpModel = SignUpModel()
-    private var utilModel: UtilModel = UtilModel(signUpActivity)
     private var settingView: ISettingsView? = null
     lateinit var email: String
-    var forgotPasswordModel: ForgotPasswordModel = ForgotPasswordModel()
-    private var databaseRepository: IDatabaseRepository = DatabaseRepository()
-
-    override fun onAttach(signUpView: ISignUpView) {
-        this.signUpView = signUpView
-    }
 
     override fun signUp(email: String, password: String, conpass: String, isSusiServerSelected: Boolean, url: String, isTermsAndConditionSelected: Boolean) {
 
@@ -133,10 +123,6 @@ class SignUpPresenter(signUpActivity: SignUpActivity) : ISignUpPresenter, ISignU
         signUpModel.cancelSignUp()
     }
 
-    override fun onDetach() {
-        signUpView = null
-    }
-
     override fun loginLogout() {
         utilModel.clearToken()
         utilModel.clearPrefs()
@@ -144,7 +130,6 @@ class SignUpPresenter(signUpActivity: SignUpActivity) : ISignUpPresenter, ISignU
         databaseRepository.deleteAllMessages()
         settingView?.startLoginActivity()
     }
-
     override fun requestPassword(email: String, url: String, isPersonalServerChecked: Boolean) {
         if (email.isEmpty()) {
             signUpView?.invalidCredentials(true, Constant.EMAIL)

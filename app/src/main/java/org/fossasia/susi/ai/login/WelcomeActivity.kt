@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
-
 import org.fossasia.susi.ai.R
 import org.fossasia.susi.ai.helper.PrefManager
 
@@ -41,13 +40,14 @@ class WelcomeActivity : AppCompatActivity() {
         }
 
         override fun onPageScrollStateChanged(arg0: Int) {
-            //empty body
+            // empty body
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        PrefManager.putBoolean(R.string.used_voice, false)
         if (PrefManager.getBoolean(R.string.activity_executed_key, false)) {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)

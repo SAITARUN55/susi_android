@@ -27,6 +27,7 @@
     <string name="hotword_success">Hotword detectado</string>
     <string name="custom_server">servidor personalizado</string>
     <string name="settings_visit_website">Visita la página web</string>
+    <string name="voice_welcome">¡Hola! ¿Como puedo ayudarte?</string>
 
     <string name="activity_executed_key" translatable="false">activity_executed</string>
     <string name="anonymous_logged_in_key" translatable="false">anonymous_logged_in</string>
@@ -87,7 +88,7 @@ Enlace de confirmación para activar su cuenta e iniciar sesión en susi.</strin
     <string name="new_password">Nueva Contraseña</string>
     <string name="current_password">Contraseña Actual</string>
     <string name="sign_up">Regístrate</string>
-    <string name="pass_validation_text">Introduzca una combinación de al menos seis caracteres</string>
+    <string name="pass_validation_text">La contraseña debe tener al menos ocho caracteres que contengan al menos un carácter especial, un número y una letra mayúscula</string>
     <string name="log_in">Iniciar sesión</string>
     <string name="field_cannot_be_empty">Este campo no puede estar vacío</string>
     <string name="email_cannot_be_empty">El correo electrónico no puede estar vacío</string>
@@ -330,4 +331,9 @@ Enlace de confirmación para activar su cuenta e iniciar sesión en susi.</strin
     <string name="feedback_section">realimentación</string>
     <string name="rate_hate">lo odié</string>
     <string name="skill_unrated_for_anonymous_user">Habilidad no clasificada aún. Por favor, inicie sesión para calificar la habilidad.</string>
+    <string name="settings_help">ayuda</string>
+    <string name="settings_help_key">ayuda</string>
+    <string name="settings_privacy">intimidad</string>
+    <string name="settings_privacy_key">intimidad</string>
+    <string name="rate_chat">Gracias por responder</string>
 </resources>

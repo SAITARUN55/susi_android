@@ -1,19 +1,18 @@
 package org.fossasia.susi.ai.chat.search
 
-import android.support.v7.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import io.realm.Realm
-import org.fossasia.susi.ai.R
-import org.fossasia.susi.ai.chat.search.adapters.ChatSearchAdapter
-import org.fossasia.susi.ai.data.db.DatabaseRepository
-import android.content.Intent
 import android.view.View
 import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_chat_search.chatSearchToolbar
+import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_chat_search.search_not_found
+import org.fossasia.susi.ai.R
 import org.fossasia.susi.ai.chat.ChatActivity
+import org.fossasia.susi.ai.chat.search.adapters.ChatSearchAdapter
+import org.fossasia.susi.ai.data.db.DatabaseRepository
 
 class ChatSearchActivity : AppCompatActivity() {
 
@@ -29,13 +28,14 @@ class ChatSearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         var bundle: Bundle ? = intent.extras
         query = bundle?.getString("query") as String
-        setSupportActionBar(chatSearchToolbar)
+
+        this.title = getString(R.string.search_results) + " - " + query
 
         setContentView(R.layout.activity_chat_search)
         loadQueryList(realm, query)
     }
 
-    //Initialise the recylerview and sends the array list to it.
+    // Initialise the recylerview and sends the array list to it.
     fun viewQueryString() {
         chatSearchRecyclerView = findViewById(R.id.search_chat_feed)
         var mLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -44,7 +44,7 @@ class ChatSearchActivity : AppCompatActivity() {
         chatSearchRecyclerView?.adapter = chatSearchAdapter
     }
 
-    //Take data from realm databse according to the query provided
+    // Take data from realm databse according to the query provided
     fun loadQueryList(realm: Realm, query: String?) {
         var result = databaseRepository.getSearchResults(query.toString())
         result.forEach { result ->
@@ -55,7 +55,7 @@ class ChatSearchActivity : AppCompatActivity() {
 
             searchChat.add(searchData)
         }
-        if (searchChat.size>0) {
+        if (searchChat.size> 0) {
             search_not_found.setVisibility(View.INVISIBLE)
             viewQueryString()
         } else {
@@ -72,7 +72,7 @@ class ChatSearchActivity : AppCompatActivity() {
     }
 }
 
-//Custom arraylist to store data as required.
+// Custom arraylist to store data as required.
 class SearchDataFormat {
     var content: String? = null
     var date: String? = null

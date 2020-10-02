@@ -27,6 +27,7 @@
     <string name="hotword_success">Hotword rilevata</string>
     <string name="custom_server">server personalizzato</string>
     <string name="settings_visit_website">Visita il sito web</string>
+    <string name="voice_welcome">Ciao! Come posso aiutarla?</string>
 
     <string name="email_not_registered">L\'email che hai inserito non è registrata con noi. Per favore riprova.</string>
     <string name="email_not_registered_title">registrazione email</string>
@@ -88,7 +89,7 @@
     <string name="new_password">Nuova Password</string>
     <string name="current_password">Password Attuale</string>
     <string name="sign_up">Registrazione</string>
-    <string name="pass_validation_text">Inserisci una combinazione di almeno sei caratteri</string>
+    <string name="pass_validation_text">La password deve contenere almeno otto caratteri e contenere almeno un carattere speciale, un numero e una lettera maiuscola</string>
     <string name="log_in">Log in</string>
     <string name="field_cannot_be_empty">il campo non può essere vuoto</string>
     <string name="email_cannot_be_empty">Email non può essere vuoto</string>
@@ -337,4 +338,9 @@
     <string name="example_feedback">Feedback di esempio</string>
     <string name="examples">Esempi</string>
     <string name="existing_user_login">Utente esistente?</string>
+    <string name="settings_help">Aiuto</string>
+    <string name="settings_help_key">Aiuto</string>
+    <string name="settings_privacy">vita privata</string>
+    <string name="settings_privacy_key">vita privata</string>
+    <string name="rate_chat">Grazie per aver risposto</string>
 </resources>
